@@ -1,0 +1,17 @@
+transformers>=4.28.1
+ml_collections
+fschat>=0.2.20
+huggingface_hub==0.16.4
+numpy
+nltk==3.8.1
+openai==0.27.8
+scikit-learn==1.2.2
+sentence-transformers==2.2.2
+tokenizers==0.13.3
+transformers==4.31.0
+wandb==0.14.0
+tqdm==4.65.0
+pandas==2.0.3
+accelerate==0.21.0
+protobuf==3.20
+datasets==2.14.3

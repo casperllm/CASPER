@@ -1,7 +1,7 @@
 import re
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from . import nethook
+from casper import nethook
 
 class ModelAndTokenizer:
     """
@@ -31,6 +31,7 @@ class ModelAndTokenizer:
             nethook.set_requires_grad(False, model)
             model.eval().to(device)
         self.tokenizer = tokenizer
+        self.tokenizer.pad_token = self.tokenizer.eos_token
         self.model = model
         self.layer_names = [
             n
@@ -47,13 +48,6 @@ class ModelAndTokenizer:
         )
     
 def generate_outputs(current_test_cases , mt, device='cuda:0',batch_size=1, max_new_tokens=100, verbose=True):
-    """
-    :param test_cases: a dictionary of test cases, where the keys are target behaviors
-    :param model: the model to use for generation
-    :param tokenizer: the tokenizer for the model
-    :param max_new_tokens: the maximum size of each generation
-    :return: a dictionary of generations, where the keys are target behaviors and the values are lists of generations
-    """
 
     input_ids = mt.tokenizer(current_test_cases, padding=True, return_tensors="pt")
     input_ids['input_ids'] = input_ids['input_ids'].to(device)
@@ -106,3 +100,21 @@ def predict_from_input(model, inp):
     probs = torch.softmax(out[:, -1], dim=1)
     p, preds = torch.max(probs, dim=1)
     return preds, p
+
+def layername(model, num, kind=None):
+    if hasattr(model, "transformer"):
+        if kind == "embed":
+            return "transformer.wte"
+        return f'transformer.h.{num}{"" if kind is None else "." + kind}'
+    if hasattr(model, "gpt_neox"):
+        if kind == "embed":
+            return "gpt_neox.embed_in"
+        if kind == "attn":
+            kind = "attention"
+        return f'gpt_neox.layers.{num}{"" if kind is None else "." + kind}'
+    else:
+        if kind == "embed":
+            return "model.embed_tokens"
+        if kind == "attn":
+            kind = "self_attn"
+        return f"model.layers.{num}{'' if kind is None else '.' + kind}"
