@@ -30,11 +30,23 @@ Please follow the instructions to download Vicuna-7B or/and LLaMA-2-7B-Chat firs
 ## Demo
 We include a notebook `demo.ipynb` which provides an example on analysis on Llama2-7B
 
+Some experiments results are shown in https://casperllm.github.io/
 
 ## Reproducibility
 
-A note for hardware: all experiments we run use one or multiple NVIDIA A100 GPUs, which have 80G memory per chip. 
+- A note for hardware: all experiments we run use one or multiple NVIDIA A100 GPUs, which have 80G memory per chip. 
+
+- You can directly run the demo.ipynb with the llama2 or vicuna model. If you attempt to run with other chat model, ensure to load the correct conversation template from fastchat.
+
+- Ensure the transformer version is correct, if fail to run demo.ipynb for layer and neuron analysis, you should try the code in the analysis folder.
 
 ## Citation
 If you find this useful in your research, please consider citing:
 
+``````
+@article{zhao2023causality,
+  title={Causality Analysis for Evaluating the Security of Large Language Models},
+  author={Zhao, Wei and Li, Zhe and Sun, Jun},
+  journal={arXiv preprint arXiv:2312.07876},
+  year={2023}
+}

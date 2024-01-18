@@ -2,7 +2,7 @@ import re
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from casper import nethook
-
+import gc
 class ModelAndTokenizer:
     """
     An object to hold on to (or automatically download and hold)
@@ -17,17 +17,23 @@ class ModelAndTokenizer:
         tokenizer=None,
         low_cpu_mem_usage=False,
         torch_dtype=None,
+        load_8_bit = False,
+        load_4_bit = False,
         device = 'cuda:0'
     ):
-        # print('wtf')
         if tokenizer is None:
             assert model_name is not None
             tokenizer = AutoTokenizer.from_pretrained(model_name)
-        if model is None:
-            assert model_name is not None
+        if load_8_bit:
+            model = AutoModelForCausalLM.from_pretrained(model_name,load_in_8bit=True)
+            nethook.set_requires_grad(False, model)
+        elif load_4_bit:
+            model = AutoModelForCausalLM.from_pretrained(model_name,load_in_4bit=True)
+            nethook.set_requires_grad(False, model)
+        else:
             model = AutoModelForCausalLM.from_pretrained(
-                model_name, low_cpu_mem_usage=low_cpu_mem_usage, torch_dtype=torch_dtype
-            )
+                    model_name, low_cpu_mem_usage=low_cpu_mem_usage, torch_dtype=torch_dtype
+                )
             nethook.set_requires_grad(False, model)
             model.eval().to(device)
         self.tokenizer = tokenizer
@@ -59,7 +65,8 @@ def generate_outputs(current_test_cases , mt, device='cuda:0',batch_size=1, max_
                                      max_new_tokens=max_new_tokens, do_sample=False, pad_token_id=mt.tokenizer.pad_token_id)
     generation = mt.tokenizer.batch_decode(outputs[:, num_input_tokens:], skip_special_tokens=True)
     # print(generation)
-            
+    del outputs
+    gc.collect()
     return generation
 
 

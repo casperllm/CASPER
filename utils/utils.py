@@ -12,7 +12,8 @@ def load_conversation_template(template_name):
     return conv_template
 
 
-def generate_input(conv_template,prompt,adv_suffix=None):
+def generate_input(conv_template,prompt,adv_suffix=None):   
+    conv_template.messages = []
     if adv_suffix is not None:
         conv_template.append_message(conv_template.roles[0], f"{prompt} {adv_suffix}")
         conv_template.append_message(conv_template.roles[1], None)
